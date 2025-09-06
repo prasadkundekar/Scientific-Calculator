@@ -9,11 +9,9 @@ class ScientificCalculator:
         self.root.geometry("720x500+100+100")
         self.root.config(bg="black")
 
-        # Entry field
         self.entry = tk.Entry(root, font=("Arial", 20, "bold"), bg="black", fg="white", bd=10, width=32, justify="right")
         self.entry.grid(row=0, column=0, columnspan=8, pady=10)
 
-        # Buttons layout
         self.create_buttons()
 
     def click(self, val):
@@ -89,7 +87,33 @@ class ScientificCalculator:
             self.entry.insert(tk.END, "Error")
 
     def show_result(self, value):
-        """Helper function to display results"""
         self.entry.delete(0, tk.END)
         self.entry.insert(tk.END, value)
 
+    def create_buttons(self):
+        buttons = [
+            ["C", "CE", "(", ")", "√", "x²", "x³", "xʸ"],
+            ["7", "8", "9", "/", "sin", "cos", "tan", "π"],
+            ["4", "5", "6", "*", "sinh", "cosh", "tanh", "e"],
+            ["1", "2", "3", "-", "log", "ln", "x!", "%"],
+            ["0", ".", "=", "+", "deg", "rad"]
+        ]
+
+        r = 1
+        for row in buttons:
+            c = 0
+            for b in row:
+                btn = tk.Button(
+                    self.root, text=b, width=6, height=2,
+                    bg="black", fg="white", font=("Arial", 16, "bold"),
+                    command=lambda val=b: self.click(val)
+                )
+                btn.grid(row=r, column=c, padx=2, pady=2)
+                c += 1
+            r += 1
+
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    calc = ScientificCalculator(root)
+    root.mainloop()
