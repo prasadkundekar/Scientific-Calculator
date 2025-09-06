@@ -16,3 +16,80 @@ class ScientificCalculator:
         # Buttons layout
         self.create_buttons()
 
+    def click(self, val):
+        expression = self.entry.get()
+        try:
+            if val == "C":  # Clear last character
+                self.entry.delete(len(expression) - 1, tk.END)
+
+            elif val == "CE":  # Clear all
+                self.entry.delete(0, tk.END)
+
+            elif val == "=":  # Evaluate
+                result = eval(expression)
+                self.entry.delete(0, tk.END)
+                self.entry.insert(tk.END, result)
+
+            elif val == "√":
+                self.show_result(math.sqrt(eval(expression)))
+
+            elif val == "x²":
+                self.show_result(eval(expression) ** 2)
+
+            elif val == "x³":
+                self.show_result(eval(expression) ** 3)
+
+            elif val == "xʸ":
+                self.entry.insert(tk.END, "**")
+
+            elif val == "π":
+                self.show_result(math.pi)
+
+            elif val == "e":
+                self.show_result(math.e)
+
+            elif val == "sin":
+                self.show_result(math.sin(math.radians(eval(expression))))
+
+            elif val == "cos":
+                self.show_result(math.cos(math.radians(eval(expression))))
+
+            elif val == "tan":
+                self.show_result(math.tan(math.radians(eval(expression))))
+
+            elif val == "sinh":
+                self.show_result(math.sinh(eval(expression)))
+
+            elif val == "cosh":
+                self.show_result(math.cosh(eval(expression)))
+
+            elif val == "tanh":
+                self.show_result(math.tanh(eval(expression)))
+
+            elif val == "log":
+                self.show_result(math.log10(eval(expression)))
+
+            elif val == "ln":
+                self.show_result(math.log(eval(expression)))
+
+            elif val == "x!":
+                self.show_result(math.factorial(eval(expression)))
+
+            elif val == "deg":
+                self.show_result(math.degrees(eval(expression)))
+
+            elif val == "rad":
+                self.show_result(math.radians(eval(expression)))
+
+            else:
+                self.entry.insert(tk.END, val)
+
+        except Exception:
+            self.entry.delete(0, tk.END)
+            self.entry.insert(tk.END, "Error")
+
+    def show_result(self, value):
+        """Helper function to display results"""
+        self.entry.delete(0, tk.END)
+        self.entry.insert(tk.END, value)
+
