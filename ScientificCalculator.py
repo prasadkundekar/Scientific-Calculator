@@ -8,10 +8,9 @@ class ScientificCalculator:
         self.root.title("My Scientific Calculator")
         self.root.config(bg="black")
 
-        # State for history panel
         self.history_visible = False
+        self.theme = "dark"
 
-        # Entry field
         self.entry = tk.Entry(
             root, font=("Arial", 18, "bold"),
             bg="black", fg="white", bd=8,
@@ -19,41 +18,41 @@ class ScientificCalculator:
         )
         self.entry.grid(row=0, column=0, columnspan=6, pady=10, padx=10)
 
-        # Buttons layout
         self.create_buttons()
 
-        # History button
         self.history_btn = tk.Button(
-            root, text="History", width=10, height=1,
+            root, text="History", width=10,
             bg="gray25", fg="white", activebackground="orange",
             font=("Arial", 12, "bold"),
             command=self.toggle_history
         )
-        self.history_btn.grid(row=7, column=0, columnspan=6, pady=5)
+        self.history_btn.grid(row=7, column=0, columnspan=3, pady=5)
 
-        # History panel (hidden by default)
+        self.theme_btn = tk.Button(
+            root, text="Light Mode", width=10,
+            bg="gray25", fg="white", activebackground="orange",
+            font=("Arial", 12, "bold"),
+            command=self.toggle_theme
+        )
+        self.theme_btn.grid(row=7, column=3, columnspan=3, pady=5)
+
         self.history_list = []
         self.history_box = tk.Listbox(
             root, width=30, height=18,
             bg="black", fg="lightgreen",
             font=("Arial", 12), bd=5
         )
-
-        # Scrollbar for history
         self.scrollbar = tk.Scrollbar(root, command=self.history_box.yview)
         self.history_box.config(yscrollcommand=self.scrollbar.set)
 
-        # Keyboard bindings
         self.bind_keys()
 
-        # Make rows/cols expand tightly
-        for i in range(1, 7):  # rows
+        for i in range(1, 7):
             root.grid_rowconfigure(i, weight=1)
-        for j in range(6):  # columns
+        for j in range(6):
             root.grid_columnconfigure(j, weight=1)
 
     def toggle_history(self):
-        """Show or hide history panel"""
         if self.history_visible:
             self.history_box.grid_forget()
             self.scrollbar.grid_forget()
@@ -65,109 +64,105 @@ class ScientificCalculator:
             self.history_visible = True
             self.history_btn.config(text="Hide History")
 
+    def toggle_theme(self):
+        if self.theme == "dark":
+            self.theme = "light"
+            bg, fg, entry_bg, entry_fg = "white", "black", "white", "black"
+            btn_bg, btn_fg = "lightgray", "black"
+            hist_bg, hist_fg = "white", "black"
+            self.theme_btn.config(text="Dark Mode")
+        else:
+            self.theme = "dark"
+            bg, fg, entry_bg, entry_fg = "black", "white", "black", "white"
+            btn_bg, btn_fg = "gray20", "white"
+            hist_bg, hist_fg = "black", "lightgreen"
+            self.theme_btn.config(text="Light Mode")
+
+        self.root.config(bg=bg)
+        self.entry.config(bg=entry_bg, fg=entry_fg)
+
+        for btn in self.root.grid_slaves():
+            if isinstance(btn, tk.Button):
+                if btn not in (self.history_btn, self.theme_btn):
+                    btn.config(bg=btn_bg, fg=btn_fg)
+
+        self.history_box.config(bg=hist_bg, fg=hist_fg)
+
     def click(self, val):
         expression = self.entry.get()
         try:
-            if val == "C":  # Clear last character
+            if val == "C":
                 self.entry.delete(len(expression) - 1, tk.END)
-
-            elif val == "CE":  # Clear all
+            elif val == "CE":
                 self.entry.delete(0, tk.END)
-
-            elif val == "=":  # Evaluate
+            elif val == "=":
                 result = eval(expression)
                 self.show_result(result)
                 self.add_to_history(expression, result)
-
             elif val == "√":
                 self.show_result(math.sqrt(eval(expression)))
-
             elif val == "x²":
                 self.show_result(eval(expression) ** 2)
-
             elif val == "x³":
                 self.show_result(eval(expression) ** 3)
-
             elif val == "xʸ":
                 self.entry.insert(tk.END, "**")
-
             elif val == "π":
                 self.entry.insert(tk.END, str(math.pi))
-
             elif val == "e":
                 self.entry.insert(tk.END, str(math.e))
-
             elif val == "sin":
                 self.show_result(math.sin(math.radians(eval(expression))))
-
             elif val == "cos":
                 self.show_result(math.cos(math.radians(eval(expression))))
-
             elif val == "tan":
                 self.show_result(math.tan(math.radians(eval(expression))))
-
             elif val == "sinh":
                 self.show_result(math.sinh(eval(expression)))
-
             elif val == "cosh":
                 self.show_result(math.cosh(eval(expression)))
-
             elif val == "tanh":
                 self.show_result(math.tanh(eval(expression)))
-
             elif val == "log":
                 self.show_result(math.log10(eval(expression)))
-
             elif val == "ln":
                 self.show_result(math.log(eval(expression)))
-
             elif val == "x!":
                 self.show_result(math.factorial(eval(expression)))
-
             elif val == "deg":
                 self.show_result(math.degrees(eval(expression)))
-
             elif val == "rad":
                 self.show_result(math.radians(eval(expression)))
-
             else:
                 self.entry.insert(tk.END, val)
-
         except Exception:
             self.entry.delete(0, tk.END)
             self.entry.insert(tk.END, "Error")
 
     def show_result(self, value):
-        """Helper function to display results"""
         self.entry.delete(0, tk.END)
         self.entry.insert(tk.END, value)
 
     def add_to_history(self, expression, result):
-        """Add calculations to history panel"""
         calc = f"{expression} = {result}"
         self.history_list.append(calc)
-        if len(self.history_list) > 20:  # keep last 20
+        if len(self.history_list) > 20:
             self.history_list.pop(0)
         self.update_history_box()
 
     def update_history_box(self):
-        """Update the Listbox with history"""
         self.history_box.delete(0, tk.END)
         for item in self.history_list:
             self.history_box.insert(tk.END, item)
 
     def bind_keys(self):
-        """Keyboard shortcuts"""
         self.root.bind("<Return>", lambda event: self.click("="))
         self.root.bind("<BackSpace>", lambda event: self.click("C"))
         self.root.bind("<Escape>", lambda event: self.click("CE"))
-
-        # Allow numbers and operators from keyboard
         for key in "0123456789+-*/().%":
             self.root.bind(key, lambda event, val=key: self.click(val))
 
     def create_buttons(self):
-        # Button labels
         buttons = [
             ["C", "CE", "(", ")", "√", "x²"],
             ["7", "8", "9", "/", "sin", "cos"],
@@ -177,7 +172,6 @@ class ScientificCalculator:
             ["x³", "xʸ", "deg", "rad", "sinh", "cosh"]
         ]
 
-        # Create buttons in grid
         r = 1
         for row in buttons:
             c = 0
