@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import ttk
 import math
 
 
@@ -6,48 +7,69 @@ class ScientificCalculator:
     def __init__(self, root):
         self.root = root
         self.root.title("My Scientific Calculator")
-        self.root.config(bg="black")
-
-        self.history_visible = False
+        self.root.geometry("650x520+200+100")
         self.theme = "dark"
+        self.history_visible = False
 
+        # Custom style
+        style = ttk.Style()
+        style.theme_use("clam")
+
+        style.configure(
+            "Rounded.TButton",
+            font=("Arial", 12, "bold"),
+            padding=10,
+            borderwidth=0,
+            relief="flat",
+            foreground="white",
+            background="#2d2d2d"
+        )
+        style.map(
+            "Rounded.TButton",
+            background=[("active", "#ff9500")],
+            foreground=[("active", "black")]
+        )
+
+        # Entry field
         self.entry = tk.Entry(
-            root, font=("Arial", 18, "bold"),
-            bg="black", fg="white", bd=8,
-            width=22, justify="right"
+            root, font=("Arial", 20, "bold"),
+            bg="black", fg="white", bd=6,
+            width=25, justify="right"
         )
         self.entry.grid(row=0, column=0, columnspan=6, pady=10, padx=10)
 
+        # Buttons layout
         self.create_buttons()
 
-        self.history_btn = tk.Button(
-            root, text="History", width=10,
-            bg="gray25", fg="white", activebackground="orange",
-            font=("Arial", 12, "bold"),
+        # History button
+        self.history_btn = ttk.Button(
+            root, text="📜 History", style="Rounded.TButton",
             command=self.toggle_history
         )
-        self.history_btn.grid(row=7, column=0, columnspan=3, pady=5)
+        self.history_btn.grid(row=7, column=0, columnspan=3, pady=8, sticky="nsew")
 
-        self.theme_btn = tk.Button(
-            root, text="Light Mode", width=10,
-            bg="gray25", fg="white", activebackground="orange",
-            font=("Arial", 12, "bold"),
+        # Theme toggle button
+        self.theme_btn = ttk.Button(
+            root, text="🌙 Light Mode", style="Rounded.TButton",
             command=self.toggle_theme
         )
-        self.theme_btn.grid(row=7, column=3, columnspan=3, pady=5)
+        self.theme_btn.grid(row=7, column=3, columnspan=3, pady=8, sticky="nsew")
 
+        # History panel
         self.history_list = []
         self.history_box = tk.Listbox(
-            root, width=30, height=18,
+            root, width=28, height=18,
             bg="black", fg="lightgreen",
             font=("Arial", 12), bd=5
         )
         self.scrollbar = tk.Scrollbar(root, command=self.history_box.yview)
         self.history_box.config(yscrollcommand=self.scrollbar.set)
 
+        # Keyboard bindings
         self.bind_keys()
 
-        for i in range(1, 7):
+        # Expand grid cells equally
+        for i in range(1, 8):
             root.grid_rowconfigure(i, weight=1)
         for j in range(6):
             root.grid_columnconfigure(j, weight=1)
@@ -57,36 +79,26 @@ class ScientificCalculator:
             self.history_box.grid_forget()
             self.scrollbar.grid_forget()
             self.history_visible = False
-            self.history_btn.config(text="History")
+            self.history_btn.config(text="📜 History")
         else:
             self.history_box.grid(row=1, column=6, rowspan=6, padx=5, pady=5, sticky="ns")
             self.scrollbar.grid(row=1, column=7, rowspan=6, sticky="ns")
             self.history_visible = True
-            self.history_btn.config(text="Hide History")
+            self.history_btn.config(text="❌ Hide History")
 
     def toggle_theme(self):
         if self.theme == "dark":
             self.theme = "light"
-            bg, fg, entry_bg, entry_fg = "white", "black", "white", "black"
-            btn_bg, btn_fg = "lightgray", "black"
-            hist_bg, hist_fg = "white", "black"
-            self.theme_btn.config(text="Dark Mode")
+            self.root.config(bg="white")
+            self.entry.config(bg="white", fg="black")
+            self.history_box.config(bg="white", fg="black")
+            self.theme_btn.config(text="🌑 Dark Mode")
         else:
             self.theme = "dark"
-            bg, fg, entry_bg, entry_fg = "black", "white", "black", "white"
-            btn_bg, btn_fg = "gray20", "white"
-            hist_bg, hist_fg = "black", "lightgreen"
-            self.theme_btn.config(text="Light Mode")
-
-        self.root.config(bg=bg)
-        self.entry.config(bg=entry_bg, fg=entry_fg)
-
-        for btn in self.root.grid_slaves():
-            if isinstance(btn, tk.Button):
-                if btn not in (self.history_btn, self.theme_btn):
-                    btn.config(bg=btn_bg, fg=btn_fg)
-
-        self.history_box.config(bg=hist_bg, fg=hist_fg)
+            self.root.config(bg="black")
+            self.entry.config(bg="black", fg="white")
+            self.history_box.config(bg="black", fg="lightgreen")
+            self.theme_btn.config(text="🌙 Light Mode")
 
     def click(self, val):
         expression = self.entry.get()
@@ -176,13 +188,12 @@ class ScientificCalculator:
         for row in buttons:
             c = 0
             for b in row:
-                btn = tk.Button(
-                    self.root, text=b, width=5, height=2,
-                    bg="gray20", fg="white", activebackground="orange",
-                    font=("Arial", 13, "bold"),
+                btn = ttk.Button(
+                    self.root, text=b,
+                    style="Rounded.TButton",
                     command=lambda val=b: self.click(val)
                 )
-                btn.grid(row=r, column=c, padx=2, pady=2, sticky="nsew")
+                btn.grid(row=r, column=c, padx=4, pady=4, sticky="nsew")
                 c += 1
             r += 1
 
