@@ -1,7 +1,10 @@
 import tkinter as tk
 import math
+import os
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
+
+HISTORY_FILE = "history.txt"
 
 class ScientificCalculator:
     def __init__(self, root):
@@ -9,7 +12,8 @@ class ScientificCalculator:
         self.root.title("My Scientific Calculator")
         self.root.geometry("750x600+200+100")
 
-        self.style = ttk.Style("cyborg")
+
+        self.style = ttk.Style("darkly")
         self.theme = "dark"
 
         self.create_menu()
@@ -21,7 +25,6 @@ class ScientificCalculator:
         )
         self.entry.grid(row=0, column=0, columnspan=6, pady=10, padx=10, sticky="nsew")
 
-        # History
         self.history_list = []
         self.history_visible = False
         self.history_box = tk.Listbox(
@@ -31,11 +34,10 @@ class ScientificCalculator:
         )
         self.scrollbar = tk.Scrollbar(root, command=self.history_box.yview)
         self.history_box.config(yscrollcommand=self.scrollbar.set)
+        self.load_history()
 
-        # Buttons layout
         self.create_buttons()
 
-        # History button
         self.history_btn = ttk.Button(
             root, text="📜 History",
             bootstyle="info-outline",
@@ -43,7 +45,6 @@ class ScientificCalculator:
         )
         self.history_btn.grid(row=7, column=0, columnspan=3, pady=8, sticky="nsew")
 
-        # Theme toggle
         self.theme_btn = ttk.Button(
             root, text="🌙 Light Mode",
             bootstyle="warning-outline",
@@ -51,13 +52,16 @@ class ScientificCalculator:
         )
         self.theme_btn.grid(row=7, column=3, columnspan=3, pady=8, sticky="nsew")
 
-
         self.bind_keys()
 
         for i in range(1, 8):
             root.grid_rowconfigure(i, weight=1)
         for j in range(6):
             root.grid_columnconfigure(j, weight=1)
+
+        # Save history on close
+        self.root.protocol("WM_DELETE_WINDOW", self.on_close)
+
 
     def create_menu(self):
         menubar = tk.Menu(self.root)
@@ -82,6 +86,7 @@ class ScientificCalculator:
             bootstyle="info"
         ).pack(expand=True, padx=20, pady=40)
 
+
     def toggle_history(self):
         if self.history_visible:
             self.history_box.grid_forget()
@@ -93,6 +98,7 @@ class ScientificCalculator:
             self.scrollbar.grid(row=1, column=7, rowspan=6, sticky="ns")
             self.history_visible = True
             self.history_btn.config(text="❌ Hide History")
+
 
     def toggle_theme(self):
         if self.theme == "dark":
@@ -171,6 +177,21 @@ class ScientificCalculator:
         for item in self.history_list:
             self.history_box.insert(tk.END, item)
 
+    def load_history(self):
+        if os.path.exists(HISTORY_FILE):
+            with open(HISTORY_FILE, "r") as f:
+                self.history_list = [line.strip() for line in f.readlines()]
+            self.update_history_box()
+
+    def save_history(self):
+        with open(HISTORY_FILE, "w") as f:
+            for item in self.history_list:
+                f.write(item + "\n")
+
+    def on_close(self):
+        self.save_history()
+        self.root.destroy()
+
     def bind_keys(self):
         self.root.bind("<Return>", lambda event: self.click("="))
         self.root.bind("<BackSpace>", lambda event: self.click("C"))
@@ -198,7 +219,6 @@ class ScientificCalculator:
                     command=lambda val=b: self.click(val)
                 )
                 btn.grid(row=r, column=c, padx=3, pady=3, sticky="nsew")
-
 
                 btn.bind("<Enter>", lambda e, b=btn: b.configure(bootstyle="success"))
                 btn.bind("<Leave>", lambda e, b=btn: b.configure(bootstyle="secondary-outline"))
