@@ -1,62 +1,29 @@
 import tkinter as tk
-from tkinter import ttk
 import math
-
+import ttkbootstrap as ttk
+from ttkbootstrap.constants import *
 
 class ScientificCalculator:
     def __init__(self, root):
         self.root = root
         self.root.title("My Scientific Calculator")
-        self.root.geometry("650x520+200+100")
+        self.root.geometry("750x600+200+100")
+
+        self.style = ttk.Style("cyborg")
         self.theme = "dark"
-        self.history_visible = False
 
-        # Custom style
-        style = ttk.Style()
-        style.theme_use("clam")
+        self.create_menu()
 
-        style.configure(
-            "Rounded.TButton",
-            font=("Arial", 12, "bold"),
-            padding=10,
-            borderwidth=0,
-            relief="flat",
-            foreground="white",
-            background="#2d2d2d"
+        self.entry = ttk.Entry(
+            root, font=("Arial", 22, "bold"),
+            bootstyle="dark",
+            justify="right"
         )
-        style.map(
-            "Rounded.TButton",
-            background=[("active", "#ff9500")],
-            foreground=[("active", "black")]
-        )
+        self.entry.grid(row=0, column=0, columnspan=6, pady=10, padx=10, sticky="nsew")
 
-        # Entry field
-        self.entry = tk.Entry(
-            root, font=("Arial", 20, "bold"),
-            bg="black", fg="white", bd=6,
-            width=25, justify="right"
-        )
-        self.entry.grid(row=0, column=0, columnspan=6, pady=10, padx=10)
-
-        # Buttons layout
-        self.create_buttons()
-
-        # History button
-        self.history_btn = ttk.Button(
-            root, text="📜 History", style="Rounded.TButton",
-            command=self.toggle_history
-        )
-        self.history_btn.grid(row=7, column=0, columnspan=3, pady=8, sticky="nsew")
-
-        # Theme toggle button
-        self.theme_btn = ttk.Button(
-            root, text="🌙 Light Mode", style="Rounded.TButton",
-            command=self.toggle_theme
-        )
-        self.theme_btn.grid(row=7, column=3, columnspan=3, pady=8, sticky="nsew")
-
-        # History panel
+        # History
         self.history_list = []
+        self.history_visible = False
         self.history_box = tk.Listbox(
             root, width=28, height=18,
             bg="black", fg="lightgreen",
@@ -65,14 +32,55 @@ class ScientificCalculator:
         self.scrollbar = tk.Scrollbar(root, command=self.history_box.yview)
         self.history_box.config(yscrollcommand=self.scrollbar.set)
 
-        # Keyboard bindings
+        # Buttons layout
+        self.create_buttons()
+
+        # History button
+        self.history_btn = ttk.Button(
+            root, text="📜 History",
+            bootstyle="info-outline",
+            command=self.toggle_history
+        )
+        self.history_btn.grid(row=7, column=0, columnspan=3, pady=8, sticky="nsew")
+
+        # Theme toggle
+        self.theme_btn = ttk.Button(
+            root, text="🌙 Light Mode",
+            bootstyle="warning-outline",
+            command=self.toggle_theme
+        )
+        self.theme_btn.grid(row=7, column=3, columnspan=3, pady=8, sticky="nsew")
+
+
         self.bind_keys()
 
-        # Expand grid cells equally
         for i in range(1, 8):
             root.grid_rowconfigure(i, weight=1)
         for j in range(6):
             root.grid_columnconfigure(j, weight=1)
+
+    def create_menu(self):
+        menubar = tk.Menu(self.root)
+        self.root.config(menu=menubar)
+
+        file_menu = tk.Menu(menubar, tearoff=0)
+        file_menu.add_command(label="Exit", command=self.root.quit)
+        menubar.add_cascade(label="File", menu=file_menu)
+
+        help_menu = tk.Menu(menubar, tearoff=0)
+        help_menu.add_command(label="About", command=lambda: self.show_about())
+        menubar.add_cascade(label="Help", menu=help_menu)
+
+    def show_about(self):
+        about_win = tk.Toplevel(self.root)
+        about_win.title("About")
+        about_win.geometry("300x150")
+        ttk.Label(
+            about_win,
+            text="📱 Scientific Calculator\nDeveloped with Python & ttkbootstrap",
+            font=("Arial", 12, "bold"),
+            bootstyle="info"
+        ).pack(expand=True, padx=20, pady=40)
 
     def toggle_history(self):
         if self.history_visible:
@@ -89,15 +97,11 @@ class ScientificCalculator:
     def toggle_theme(self):
         if self.theme == "dark":
             self.theme = "light"
-            self.root.config(bg="white")
-            self.entry.config(bg="white", fg="black")
-            self.history_box.config(bg="white", fg="black")
+            self.style.theme_use("flatly")
             self.theme_btn.config(text="🌑 Dark Mode")
         else:
             self.theme = "dark"
-            self.root.config(bg="black")
-            self.entry.config(bg="black", fg="white")
-            self.history_box.config(bg="black", fg="lightgreen")
+            self.style.theme_use("darkly")
             self.theme_btn.config(text="🌙 Light Mode")
 
     def click(self, val):
@@ -190,15 +194,20 @@ class ScientificCalculator:
             for b in row:
                 btn = ttk.Button(
                     self.root, text=b,
-                    style="Rounded.TButton",
+                    bootstyle="secondary-outline",
                     command=lambda val=b: self.click(val)
                 )
-                btn.grid(row=r, column=c, padx=4, pady=4, sticky="nsew")
+                btn.grid(row=r, column=c, padx=3, pady=3, sticky="nsew")
+
+
+                btn.bind("<Enter>", lambda e, b=btn: b.configure(bootstyle="success"))
+                btn.bind("<Leave>", lambda e, b=btn: b.configure(bootstyle="secondary-outline"))
+
                 c += 1
             r += 1
 
 
 if __name__ == "__main__":
-    root = tk.Tk()
+    root = ttk.Window(themename="darkly")  # ttkbootstrap main window
     calc = ScientificCalculator(root)
     root.mainloop()
