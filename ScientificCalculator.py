@@ -208,6 +208,6 @@ class ScientificCalculator:
 
 
 if __name__ == "__main__":
-    root = ttk.Window(themename="darkly")  # ttkbootstrap main window
+    root = ttk.Window(themename="darkly")
     calc = ScientificCalculator(root)
     root.mainloop()
