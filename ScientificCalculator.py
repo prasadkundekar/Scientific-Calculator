@@ -3,6 +3,7 @@ import math
 import os
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
+from tkinter import messagebox
 
 HISTORY_FILE = "history.txt"
 
@@ -10,8 +11,8 @@ class ScientificCalculator:
     def __init__(self, root):
         self.root = root
         self.root.title("My Scientific Calculator")
-        self.root.geometry("750x600+200+100")
 
+        self.center_window(750, 600)
 
         self.style = ttk.Style("darkly")
         self.theme = "dark"
@@ -59,9 +60,14 @@ class ScientificCalculator:
         for j in range(6):
             root.grid_columnconfigure(j, weight=1)
 
-        # Save history on close
         self.root.protocol("WM_DELETE_WINDOW", self.on_close)
 
+    def center_window(self, width=750, height=600):
+        screen_width = self.root.winfo_screenwidth()
+        screen_height = self.root.winfo_screenheight()
+        x = (screen_width // 2) - (width // 2)
+        y = (screen_height // 2) - (height // 2)
+        self.root.geometry(f"{width}x{height}+{x}+{y}")
 
     def create_menu(self):
         menubar = tk.Menu(self.root)
@@ -86,7 +92,6 @@ class ScientificCalculator:
             bootstyle="info"
         ).pack(expand=True, padx=20, pady=40)
 
-
     def toggle_history(self):
         if self.history_visible:
             self.history_box.grid_forget()
@@ -98,7 +103,6 @@ class ScientificCalculator:
             self.scrollbar.grid(row=1, column=7, rowspan=6, sticky="ns")
             self.history_visible = True
             self.history_btn.config(text="❌ Hide History")
-
 
     def toggle_theme(self):
         if self.theme == "dark":
@@ -122,7 +126,10 @@ class ScientificCalculator:
                 self.show_result(result)
                 self.add_to_history(expression, result)
             elif val == "√":
-                self.show_result(math.sqrt(eval(expression)))
+                value = eval(expression)
+                if value < 0:
+                    raise ValueError("Square root of negative number not allowed.")
+                self.show_result(math.sqrt(value))
             elif val == "x²":
                 self.show_result(eval(expression) ** 2)
             elif val == "x³":
@@ -146,20 +153,39 @@ class ScientificCalculator:
             elif val == "tanh":
                 self.show_result(math.tanh(eval(expression)))
             elif val == "log":
-                self.show_result(math.log10(eval(expression)))
+                value = eval(expression)
+                if value <= 0:
+                    raise ValueError("Logarithm of non-positive numbers is undefined.")
+                self.show_result(math.log10(value))
             elif val == "ln":
-                self.show_result(math.log(eval(expression)))
+                value = eval(expression)
+                if value <= 0:
+                    raise ValueError("Natural log of non-positive numbers is undefined.")
+                self.show_result(math.log(value))
             elif val == "x!":
-                self.show_result(math.factorial(eval(expression)))
+                value = eval(expression)
+                if not isinstance(value, int) or value < 0:
+                    raise ValueError("Factorial is only defined for non-negative integers.")
+                self.show_result(math.factorial(value))
             elif val == "deg":
                 self.show_result(math.degrees(eval(expression)))
             elif val == "rad":
                 self.show_result(math.radians(eval(expression)))
             else:
                 self.entry.insert(tk.END, val)
-        except Exception:
+
+        except ZeroDivisionError:
+            messagebox.showerror("Math Error", "Division by zero is not allowed.")
             self.entry.delete(0, tk.END)
-            self.entry.insert(tk.END, "Error")
+        except SyntaxError:
+            messagebox.showerror("Syntax Error", "Invalid expression. Please check your input.")
+            self.entry.delete(0, tk.END)
+        except ValueError as ve:
+            messagebox.showerror("Math Error", str(ve))
+            self.entry.delete(0, tk.END)
+        except Exception as e:
+            messagebox.showerror("Error", f"Unexpected error: {str(e)}")
+            self.entry.delete(0, tk.END)
 
     def show_result(self, value):
         self.entry.delete(0, tk.END)
